@@ -9,18 +9,6 @@ from babel.numbers import format_decimal
 import datetime
 
 
-class ExampleResource:
-    async def on_get(self, req, resp, locale):
-        if(locale not in locales):
-            locale = default_fallback
-
-        resp.status = falcon.HTTP_200
-        resp.content_type = 'text/html'
-        print(req.prefix)
-        template = env.get_template("index.html")
-        resp.text = template.render(**locales[locale], locale=locale, attendee_value=100, date_value=datetime.date(2021, 12, 4), time_value=datetime.time(10, 30, 0))
-
-
 app = falcon.asgi.App()
 env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
 
@@ -72,6 +60,18 @@ env.filters['plural_formatting'] = plural_formatting
 env.filters['number_formatting'] = number_formatting
 env.filters['date_formatting'] = date_formatting
 env.filters['time_formatting'] = time_formatting
+
+
+class ExampleResource:
+    async def on_get(self, req, resp, locale):
+        if(locale not in locales):
+            locale = default_fallback
+
+        resp.status = falcon.HTTP_200
+        resp.content_type = 'text/html'
+        template = env.get_template("index.html")
+        resp.text = template.render(**locales[locale], locale=locale, attendee_value=100, date_value=datetime.date(2021, 12, 4), time_value=datetime.time(10, 30, 0))
+
 
 example = ExampleResource()
 
