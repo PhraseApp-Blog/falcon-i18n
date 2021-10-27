@@ -1,20 +1,25 @@
 # falcon-i18n
 Learn to build a multilingual web application using Falcon framework. Utilizing Jinja2 and Babel to implement the following features:
-* i18n restful URL
-* simple pluralization
+* message catalog
+* interpolation
+* custom filters
 * number formatting
-* date and time formatting
+* date date_formatting
+* time formatting
+* pluralization
+* i18n restful URL
 
 ## Setup
 The folder structure for this tutorial is as follows:
 
 ```
 ├── locales
-│   ├── en_US.json
-│   └── de_DE.json
+│   ├── en
+│   └── de
 ├── templates
 |   └── index.html
 ├── main.py
+├── babel.cfg
 └── requirements.txt
 ```
 
@@ -34,24 +39,35 @@ Alternatively, install via `requirements.txt`:
     pip install -r requirements.txt
 
 
-## Language files
-Language files is based on simple JSON data format.
+## Message Catalogs
+Babel configuration for custom extrator:
 
-```json
-{
-  "app_title": "Gourmet au Catering",
-  "about": "About Us",
-  "menu": "Menu",
-  "contact": "Contact",
-  "slogan": "Tradition since 1889",
-  "description": "We offer full-service catering for any event, large or small. We understand your needs and we will cater the food to satisfy the biggerst criteria of them all, both look and taste. Do not hesitate to contact us.",
-  "event": "Upcoming Event",
-  "date": "Date",
-  "time": "Time",
-  "attendee": "attendee",
-  "attendee_plural": "attendees"
-}
 ```
+[python: **.py]
+encoding = utf-8
+[jinja2: **/templates/**.html]
+encoding = utf-8
+extensions=jinja2.ext.autoescape,jinja2.ext.with_
+```
+
+Run the following command for extraction
+
+    pybabel extract -F babel.cfg -o locales/messages.pot templates/
+
+Initialization for all the supported locales:
+
+    pybabel init -l en -i locales/messages.pot -d locales
+    pybabel init -l de -i locales/messages.pot -d locales
+
+You can use the update command to make changes to existing translation files:
+
+    pybabel extract -F babel.cfg -o locales/messages.pot templates/
+    pybabel update -i locales/messages.pot -d locales
+
+
+Finally, compile it into machine-readable files:
+
+    pybabel compile -d locales
 
 ## HTML
 This tutorial uses the lite version of a [HTML template made by W3.CSS](https://www.w3schools.com/w3css/tryw3css_templates_gourmet_catering.htm)
@@ -63,82 +79,74 @@ Complete code for Falcon server
 ```py
 import falcon
 import falcon.asgi
-import json
 import jinja2
-import glob
-from babel.plural import PluralRule
+import datetime
+import gettext
+import os
 from babel.dates import format_date, format_time
 from babel.numbers import format_decimal
-import datetime
+
+app = falcon.asgi.App()
+translations = {}
+default_fallback = 'en'
+env = jinja2.Environment(extensions=['jinja2.ext.i18n', 'jinja2.ext.with_'], loader=jinja2.FileSystemLoader('templates'))
+
+base_dir = 'locales'
+supported_langs = [x for x in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, x))]
+
+for lang in supported_langs:
+    translations[lang] = gettext.translation('messages', localedir='locales', languages=[lang])
+
+env.install_gettext_translations(translations[default_fallback])
+
+
+def num_filter(input, locale):
+    return format_decimal(input, locale=locale)
+
+
+def date_filter(input, locale):
+    return format_date(input, format='full', locale=locale)
+
+
+def time_filter(input, locale):
+    return format_time(input, locale=locale)
+
+
+env.filters['num_filter'] = num_filter
+env.filters['date_filter'] = date_filter
+env.filters['time_filter'] = time_filter
 
 
 class ExampleResource:
     async def on_get(self, req, resp, locale):
-        if(locale not in locales):
+        if(locale not in supported_langs):
             locale = default_fallback
+
+        env.install_gettext_translations(translations[locale])
+
+        # mock data
+        data = {
+            "event_attendee": 1234,
+            "event_date": datetime.date(2021, 12, 4),
+            "event_time": datetime.time(10, 30, 0)
+        }
 
         resp.status = falcon.HTTP_200
         resp.content_type = 'text/html'
-        print(req.prefix)
         template = env.get_template("index.html")
-        resp.text = template.render(**locales[locale], locale=locale, attendee_value=100, date_value=datetime.date(2021, 12, 4), time_value=datetime.time(10, 30, 0))
+        resp.text = template.render(**data, locale=locale)
 
 
-app = falcon.asgi.App()
-env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
+class RedirectResource:
+    async def on_get(self, req, resp):
+        raise falcon.HTTPFound(req.prefix + '/en/main')
 
-default_fallback = 'en'
-locales = {}
-plural_rule = PluralRule({'one': 'n in 0..1'})
-
-language_list = glob.glob("locales/*.json")
-for lang in language_list:
-    filename = lang.split('\\')
-    lang_code = filename[1].split('.')[0]
-
-    with open(lang, 'r', encoding='utf8') as file:
-        locales[lang_code] = json.load(file)
-
-
-# custom filters for Jinja2
-def plural_formatting(key_value, input, locale):
-    key = ''
-    for i in locales[locale]:
-        if(key_value == locales[locale][i]):
-            key = i
-            break
-
-    if not key:
-        return key_value
-
-    plural_key = f"{key}_plural"
-
-    if(plural_rule(input) != 'one' and plural_key in locales[locale]):
-        key = plural_key
-
-    return locales[locale][key]
-
-
-def number_formatting(input, locale):
-    return format_decimal(input, locale=locale)
-
-
-def date_formatting(input, locale):
-    return format_date(input, format='full', locale=locale)
-
-
-def time_formatting(input, locale):
-    return format_time(input, locale=locale)
-
-
-env.filters['plural_formatting'] = plural_formatting
-env.filters['number_formatting'] = number_formatting
-env.filters['date_formatting'] = date_formatting
-env.filters['time_formatting'] = time_formatting
 
 example = ExampleResource()
+redirect = RedirectResource()
 
 app.add_route('/{locale}/main', example)
+app.add_route('/', redirect)
 ```
 
 Run the server as follows:
