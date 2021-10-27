@@ -1,0 +1,67 @@
+# German translations for PROJECT.
+# Copyright (C) 2021 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2021-10-27 10:46+0800\n"
+"PO-Revision-Date: 2021-10-27 09:26+0800\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: templates/index.html:19
+msgid "Gourmet au Catering"
+msgstr ""
+
+#: templates/index.html:22 templates/index.html:39
+msgid "About Us"
+msgstr "Über uns"
+
+#: templates/index.html:23
+msgid "Menu"
+msgstr "Menü"
+
+#: templates/index.html:24
+msgid "Contact"
+msgstr "Kontakt"
+
+#: templates/index.html:40
+msgid "Tradition since 1889"
+msgstr "Tradition seit 1889"
+
+#: templates/index.html:41
+msgid "Description"
+msgstr ""
+"Wir bieten Full-Service-Catering für jede Veranstaltung, ob groß oder "
+"klein. Wir verstehen Ihre Bedürfnisse und werden die Speisen so "
+"zubereiten, dass sie die höchsten Kriterien erfüllen, sowohl optisch als "
+"auch geschmacklich. Zögern Sie nicht, uns zu kontaktieren."
+
+#: templates/index.html:42
+msgid "Upcoming Event"
+msgstr "Kommende Veranstaltung"
+
+#: templates/index.html:44
+msgid "Date"
+msgstr "Datum"
+
+#: templates/index.html:45
+msgid "Time"
+msgstr "Zeit"
+
+#: templates/index.html:47
+#, fuzzy, python-format
+msgid "attendee"
+msgid_plural "attendees"
+msgstr[0] "Teilnehmer"
+msgstr[1] "Teilnehmer"
+
