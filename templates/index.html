@@ -16,12 +16,12 @@ h1, h2, h3, h4, h5, h6 {
 <!-- Navbar (sit on top) -->
 <div class="w3-top">
   <div class="w3-bar w3-white w3-padding w3-card" style="letter-spacing:4px;">
-    <a href="#home" class="w3-bar-item w3-button">{{ app_title }}</a>
+    <a href="#home" class="w3-bar-item w3-button">{{ _("Gourmet au Catering") }}</a>
     <!-- Right-sided navbar links. Hide them on small screens -->
     <div class="w3-right w3-hide-small">
-      <a href="#about" class="w3-bar-item w3-button">{{ about }}</a>
-      <a href="#menu" class="w3-bar-item w3-button">{{ menu }}</a>
-      <a href="#contact" class="w3-bar-item w3-button">{{ contact }}</a>
+      <a href="#about" class="w3-bar-item w3-button">{{ _("About Us") }}</a>
+      <a href="#menu" class="w3-bar-item w3-button">{{ _("Menu") }}</a>
+      <a href="#contact" class="w3-bar-item w3-button">{{ _("Contact") }}</a>
     </div>
   </div>
 </div>
@@ -36,15 +36,15 @@ h1, h2, h3, h4, h5, h6 {
     </div>
 
     <div class="w3-col m6 w3-padding-large">
-      <h1 class="w3-center">{{ about }}</h1><br>
-      <h5 class="w3-center">{{ slogan }}</h5>
-      <p class="w3-large">{{ description }}</p>
-      <h4><strong>{{ event }}</strong></h4>
+      <h1 class="w3-center">{{ _("About Us") }}</h1><br>
+      <h5 class="w3-center">{{ _("Tradition since 1889") }}</h5>
+      <p class="w3-large">{{ _("Description") }}</p>
+      <h4><strong>{{ _("Upcoming Event") }}</strong></h4>
       <ul>
-        <li><strong>{{ date }}:</strong> {{ date_value | date_formatting(locale) }}</li>
-        <li><strong>{{ time }}:</strong> {{ time_value | time_formatting(locale) }}</li>
+        <li><strong>{{ _("Date") }}:</strong> {{ event_date | date_filter(locale) }}</li>
+        <li><strong>{{ _("Time") }}:</strong> {{ event_time | time_filter(locale) }}</li>
       </ul>
-      <p><i>{{ attendee_value | number_formatting(locale) }} {{ attendee | plural_formatting(attendee_value, locale) }}</i></p>
+      <p><i>{{ event_attendee | num_filter(locale) }} {{ ngettext('attendee', 'attendees', event_attendee) }}</i></p>
     </div>
   </div>
 

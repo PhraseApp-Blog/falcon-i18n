@@ -1,78 +1,70 @@
 import falcon
 import falcon.asgi
-import json
 import jinja2
-import glob
-from babel.plural import PluralRule
+import datetime
+import gettext
+import os
 from babel.dates import format_date, format_time
 from babel.numbers import format_decimal
-import datetime
-
 
 app = falcon.asgi.App()
-env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
-
+translations = {}
 default_fallback = 'en'
-locales = {}
-plural_rule = PluralRule({'one': 'n in 0..1'})
+env = jinja2.Environment(extensions=['jinja2.ext.i18n', 'jinja2.ext.with_'], loader=jinja2.FileSystemLoader('templates'))
 
-language_list = glob.glob("locales/*.json")
-for lang in language_list:
-    filename = lang.split('\\')
-    lang_code = filename[1].split('.')[0]
+base_dir = 'locales'
+supported_langs = [x for x in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, x))]
 
-    with open(lang, 'r', encoding='utf8') as file:
-        locales[lang_code] = json.load(file)
+for lang in supported_langs:
+    translations[lang] = gettext.translation('messages', localedir='locales', languages=[lang])
 
-
-# custom filters for Jinja2
-def plural_formatting(key_value, input, locale):
-    key = ''
-    for i in locales[locale]:
-        if(key_value == locales[locale][i]):
-            key = i
-            break
-
-    if not key:
-        return key_value
-
-    plural_key = f"{key}_plural"
-
-    if(plural_rule(input) != 'one' and plural_key in locales[locale]):
-        key = plural_key
-
-    return locales[locale][key]
+env.install_gettext_translations(translations[default_fallback])
 
 
-def number_formatting(input, locale):
+def num_filter(input, locale):
     return format_decimal(input, locale=locale)
 
 
-def date_formatting(input, locale):
+def date_filter(input, locale):
     return format_date(input, format='full', locale=locale)
 
 
-def time_formatting(input, locale):
+def time_filter(input, locale):
     return format_time(input, locale=locale)
 
 
-env.filters['plural_formatting'] = plural_formatting
-env.filters['number_formatting'] = number_formatting
-env.filters['date_formatting'] = date_formatting
-env.filters['time_formatting'] = time_formatting
+env.filters['num_filter'] = num_filter
+env.filters['date_filter'] = date_filter
+env.filters['time_filter'] = time_filter
 
 
 class ExampleResource:
     async def on_get(self, req, resp, locale):
-        if(locale not in locales):
+        if(locale not in supported_langs):
             locale = default_fallback
+
+        env.install_gettext_translations(translations[locale])
+
+        # get data
+        data = {
+            "event_attendee": 1234,
+            "event_date": datetime.date(2021, 12, 4),
+            "event_time": datetime.time(10, 30, 0)
+        }
 
         resp.status = falcon.HTTP_200
         resp.content_type = 'text/html'
         template = env.get_template("index.html")
-        resp.text = template.render(**locales[locale], locale=locale, attendee_value=100, date_value=datetime.date(2021, 12, 4), time_value=datetime.time(10, 30, 0))
+        resp.text = template.render(**data, locale=locale)
+
+
+class RedirectResource:
+    async def on_get(self, req, resp):
+        raise falcon.HTTPFound(req.prefix + '/en/main')
 
 
 example = ExampleResource()
+redirect = RedirectResource()
 
 app.add_route('/{locale}/main', example)
+app.add_route('/', redirect)
