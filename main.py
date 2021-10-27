@@ -45,7 +45,7 @@ class ExampleResource:
 
         env.install_gettext_translations(translations[locale])
 
-        # get data
+        # mock data
         data = {
             "event_attendee": 1234,
             "event_date": datetime.date(2021, 12, 4),
