@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<title>{{ app_title }}</title>
+<title>{{ _("Gourmet au Catering") }}</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -41,10 +41,10 @@ h1, h2, h3, h4, h5, h6 {
       <p class="w3-large">{{ _("Description") }}</p>
       <h4><strong>{{ _("Upcoming Event") }}</strong></h4>
       <ul>
-        <li><strong>{{ _("Date") }}:</strong> {{ event_date | date_filter(locale) }}</li>
-        <li><strong>{{ _("Time") }}:</strong> {{ event_time | time_filter(locale) }}</li>
+        <li><strong>{{ _("Date") }}:</strong> {{ event_date | date_filter }}</li>
+        <li><strong>{{ _("Time") }}:</strong> {{ event_time | time_filter }}</li>
       </ul>
-      <p><i>{{ event_attendee | num_filter(locale) }} {{ ngettext('attendee', 'attendees', event_attendee) }}</i></p>
+      <p><i>{{ event_attendee | num_filter }} {{ ngettext('attendee', 'attendees', event_attendee) }}</i></p>
     </div>
   </div>
 
