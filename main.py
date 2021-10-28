@@ -21,16 +21,31 @@ for lang in supported_langs:
 env.install_gettext_translations(translations[default_fallback])
 
 
-def num_filter(input, locale):
-    return format_decimal(input, locale=locale)
+def get_active_locale(context, locale):
+    if context:
+        context_locale = context.get('locale', default_fallback)
+    else:
+        context_locale = locale
+
+    return context_locale
 
 
-def date_filter(input, locale):
-    return format_date(input, format='full', locale=locale)
+@jinja2.contextfilter
+def num_filter(context, input, locale=default_fallback):
+    context_locale = get_active_locale(context, locale)
+    return format_decimal(input, locale=context_locale)
 
 
-def time_filter(input, locale):
-    return format_time(input, locale=locale)
+@jinja2.contextfilter
+def date_filter(context, input, locale=default_fallback):
+    context_locale = get_active_locale(context, locale)
+    return format_date(input, format='full', locale=context_locale)
+
+
+@jinja2.contextfilter
+def time_filter(context, input, locale=default_fallback):
+    context_locale = get_active_locale(context, locale)
+    return format_time(input, locale=context_locale)
 
 
 env.filters['num_filter'] = num_filter
